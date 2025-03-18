@@ -61,6 +61,9 @@ export default function Home() {
 		setStocks([]);
 		setNotification(null);
 		setInputError(false);
+
+		// Animate the results away
+		setTimeout(() => setStocks([]), 500);
 	}
 
 	function handleKeyPress(event) {
@@ -100,7 +103,7 @@ export default function Home() {
 
 			{/* Subheading */}
 			<motion.p className="text-gray-400 text-lg mt-2">
-				Search for a stock to view market trends & gather quantum AI predictions.
+				Discover market trends and unlock insights with Quantum Algorithms and AI/ML models!
 			</motion.p>
 
 			{/* Search Bar */}
@@ -138,41 +141,43 @@ export default function Home() {
 				</select>
 			</div>
 
-			{/* Stock Results */}
-			{stocks.length > 0 && (
-				<motion.div
-					initial={{ opacity: 0, y: 10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="mt-6 w-full max-w-lg bg-gray-800 rounded-lg p-4 shadow-md"
-				>
-					<h2 className="text-xl font-semibold">Search Results</h2>
-					{loading ? (
-						<p className="text-gray-400">Loading...</p>
-					) : (
-						<ul className="mt-3 space-y-2">
-							<AnimatePresence>
-								{stocks.map((stock, index) => (
-									<motion.li
-										key={stock.symbol}
-										initial={{ opacity: 0, y: -5 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -5 }}
-										transition={{ duration: 0.4 }}
-										whileHover={{ scale: 1.05 }}
-										className="p-2 cursor-pointer hover:bg-gray-700 rounded-md transition flex items-center gap-3"
-										onClick={() => navigate(`/dashboard/${stock.symbol}`)}
-									>
-										<span className="text-lg">
-											{stock.instrument_name} ({stock.symbol})
-										</span>
-									</motion.li>
-								))}
-							</AnimatePresence>
-						</ul>
-					)}
-				</motion.div>
-			)}
+			{/* Stock Results with Smooth Fade-Out */}
+			<AnimatePresence>
+				{stocks.length > 0 && (
+					<motion.div
+						initial={{ opacity: 0, y: -10 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -10, transition: { duration: 0.5 } }}
+						key="search-results"
+						className="mt-6 w-full max-w-lg bg-gray-800 rounded-lg p-4 shadow-md"
+					>
+						<h2 className="text-xl font-semibold">Search Results</h2>
+						{loading ? (
+							<p className="text-gray-400">Loading...</p>
+						) : (
+							<ul className="mt-3 space-y-2">
+								<AnimatePresence>
+									{stocks.map((stock, index) => (
+										<motion.li
+											key={stock.symbol}
+											initial={{ opacity: 0, y: -5 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -5, transition: { duration: 0.4 } }}
+											whileHover={{ scale: 1.05 }}
+											className="p-2 cursor-pointer hover:bg-gray-700 rounded-md transition flex items-center gap-3"
+											onClick={() => navigate(`/dashboard/${stock.symbol}`)}
+										>
+											<span className="text-lg">
+												{stock.instrument_name} ({stock.symbol})
+											</span>
+										</motion.li>
+									))}
+								</AnimatePresence>
+							</ul>
+						)}
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 }

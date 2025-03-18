@@ -14,9 +14,9 @@
 export default function PredictionWidget() {
 	return (
 		<div className="bg-gray-800 rounded-lg shadow-md p-4">
-			<h2 className="text-lg font-bold mb-2">Quantum Prediction 🔮</h2>
+			<h2 className="text-lg font-bold mb-2">Quantum Prediction</h2>
 			<p className="mb-2">Prediction: <span className="font-semibold text-green-400">Bullish 📈</span></p>
-			<p className="text-sm text-gray-400">Confidence: 85%</p>
+			<p className="text-sm text-gray-400">Confidence Interval: 85%</p>
 			<p className="mt-2 text-sm text-gray-300">
 				Quantum model indicates a high probability of upward movement based on recent market trends.
 			</p>
