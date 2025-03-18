@@ -1,6 +1,6 @@
 # Node.js and React
 /node_modules/
-/.env
+*.env
 npm-debug.log*
 yarn-error.log*
 /dist/

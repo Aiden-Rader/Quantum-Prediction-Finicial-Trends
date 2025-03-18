@@ -1,4 +1,4 @@
-import { ResponsiveContainer, ComposedChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Line, Legend, Rectangle } from "recharts";
+import { ResponsiveContainer, ComposedChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Line, Rectangle } from "recharts";
 
 export default function StockChart({ stockData }) {
 	if (!stockData || !stockData.values || stockData.values.length === 0) {
@@ -53,8 +53,8 @@ export default function StockChart({ stockData }) {
 							y={Math.min(data.open, data.close)}
 							width={8}
 							height={Math.abs(data.open - data.close)}
-							fill={data.open < data.close ? "rgba(34, 197, 94, 0.7)" : "rgba(239, 68, 68, 0.7)"} // Softer transparency
-							stroke={data.open < data.close ? "green" : "red"} // Thin outline
+							fill={data.open < data.close ? "rgba(34, 197, 94, 0.7)" : "rgba(239, 68, 68, 0.7)"}
+							stroke={data.open < data.close ? "green" : "red"}
 							strokeWidth={1}
 						/>
 					))}

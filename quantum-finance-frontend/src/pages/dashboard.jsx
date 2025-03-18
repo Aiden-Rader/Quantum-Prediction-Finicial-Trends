@@ -109,7 +109,7 @@ export default function Dashboard() {
 
 					{/* Interval Selection */}
 					<div className="mt-4">
-						<label className="mr-2 text-gray-400">Select Interval:</label>
+							<label for="interval" className="mr-2 text-gray-400">Select Interval:</label>
 						<select
 							value={interval}
 							onChange={(e) => setIntervalValue(e.target.value)}
