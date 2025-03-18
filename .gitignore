@@ -7,7 +7,7 @@ yarn-error.log*
 /build/
 
 # Python
-__pycache__/
+*__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -55,3 +55,4 @@ ehthumbs.db
 *.bson
 *.config
 *.vscode
+*.pkl
