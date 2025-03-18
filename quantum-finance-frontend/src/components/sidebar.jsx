@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const YAHOO_API_KEY = process.env.REACT_APP_YAHOO_API_KEY;
-const ALPHA_VANTAGE_API_KEY = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
+const POLYGONIO_API_KEY = process.env.REACT_APP_POLYGON.IO_API_KEY;
 
-export default function Sidebar({ symbol, latestData, sidebarOpen, setSidebarOpen }) {
+export default function Sidebar({ symbol, sidebarOpen, setSidebarOpen }) {
 	const [companyInfo, setCompanyInfo] = useState(null);
 	const [news, setNews] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -18,21 +18,21 @@ export default function Sidebar({ symbol, latestData, sidebarOpen, setSidebarOpe
 		async function fetchCompanyData() {
 			setLoading(true);
 			try {
-				// Fetch Company Profile (Alpha Vantage API) 25 calls per day
+				// Fetch Company Profile (Polygon.io)
 				const companyRes = await axios.get(
-					`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
+					`https://api.polygon.io/v3/reference/tickers/${symbol}?apiKey=${POLYGONIO_API_KEY}`
 				);
 
-				if (companyRes.data) {
+				const companyData = companyRes.data.results || {};
+				if (companyData && companyRes.status == 200) {
 					setCompanyInfo({
-						name: companyRes.data.Name || "N/A",
-						industry: companyRes.data.Industry || "N/A",
-						sector: companyRes.data.Sector || "N/A",
-						marketCap: companyRes.data.MarketCapitalization
-							? `$${(companyRes.data.MarketCapitalization / 1e9).toFixed(2)}B`
-							: "N/A",
-						website: companyRes.data.OfficialSite || "#",
-						description: companyRes.data.description || "N/A",
+						name: companyData.name || "N/A",
+						sector: companyData.sic_description || "N/A",
+						marketCap: companyData.market_cap ? `$${(companyData.market_cap / 1e9).toFixed(2)}B` : "N/A",
+						website: companyData.homepage_url || "#",
+						description: companyData.description || "N/A",
+						logo: companyData.branding.logo_url || "https://via.placeholder.com/150",
+						icon: companyData.branding.icon_url || "https://via.placeholder.com/150"
 					});
 				}
 
@@ -49,26 +49,28 @@ export default function Sidebar({ symbol, latestData, sidebarOpen, setSidebarOpe
 				);
 
 				const stockData = stockRes.data.body?.[0] || {};
-				setStockQuote({
-					regularMarketPrice: stockData.regularMarketPrice || "N/A",
-					previousClose: stockData.regularMarketPreviousClose || "N/A",
-					dayHigh: stockData.regularMarketDayHigh || "N/A",
-					dayLow: stockData.regularMarketDayLow || "N/A",
-					yearHigh: stockData.fiftyTwoWeekHigh || "N/A",
-					yearLow: stockData.fiftyTwoWeekLow || "N/A",
-					peRatio: stockData.trailingPE || "N/A",
-					dividendYield: stockData.dividendYield ? `${stockData.dividendYield}%` : "N/A",
-					dividendDate: stockData.dividendDate
-						? new Date(stockData.dividendDate * 1000).toLocaleDateString()
-						: "N/A",
-					eps: stockData.epsTrailingTwelveMonths || "N/A",
-					marketCap: stockData.marketCap
-						? `$${(stockData.marketCap / 1e9).toFixed(2)}B`
-						: "N/A",
-					earningsDate: stockData.earningsTimestamp
-						? new Date(stockData.earningsTimestamp * 1000).toLocaleDateString()
-						: "N/A",
-				});
+				if (stockData && stockRes.status == 200) {
+					setStockQuote({
+						regularMarketPrice: stockData.regularMarketPrice || "N/A",
+						previousClose: stockData.regularMarketPreviousClose || "N/A",
+						dayHigh: stockData.regularMarketDayHigh || "N/A",
+						dayLow: stockData.regularMarketDayLow || "N/A",
+						yearHigh: stockData.fiftyTwoWeekHigh || "N/A",
+						yearLow: stockData.fiftyTwoWeekLow || "N/A",
+						peRatio: stockData.trailingPE || "N/A",
+						dividendYield: stockData.dividendYield ? `${stockData.dividendYield}%` : "N/A",
+						dividendDate: stockData.dividendDate
+							? new Date(stockData.dividendDate * 1000).toLocaleDateString()
+							: "N/A",
+						eps: stockData.epsTrailingTwelveMonths || "N/A",
+						marketCap: stockData.marketCap
+							? `$${(stockData.marketCap / 1e9).toFixed(2)}B`
+							: "N/A",
+						earningsDate: stockData.earningsTimestamp
+							? new Date(stockData.earningsTimestamp * 1000).toLocaleDateString()
+							: "N/A",
+					});
+				}
 
 				// Fetch Company News (Yahoo Finance)
 				const newsRes = await axios.get(
@@ -82,7 +84,9 @@ export default function Sidebar({ symbol, latestData, sidebarOpen, setSidebarOpe
 					}
 				);
 
-				setNews(newsRes.data?.body || []);
+				if (newsRes.status == 200) {
+					setNews(newsRes.data.body || []);
+				}
 			} catch (error) {
 				console.error("Error fetching company data:", error);
 			} finally {
@@ -107,7 +111,10 @@ export default function Sidebar({ symbol, latestData, sidebarOpen, setSidebarOpe
 			>
 				{/* Sidebar Header */}
 				<div className="flex justify-between items-center">
-					<h2 className="text-xl font-bold">Stock Details</h2>
+					<div className="flex items-center gap-2">
+						<img src={companyInfo.icon} alt="Icon" className="w-6 h-6" />
+						<h2 className="text-xl font-bold">Stock Details - ({symbol})</h2>
+					</div>
 					<button
 						onClick={() => setSidebarOpen(false)}
 						className="text-gray-400 hover:text-white text-xl"
@@ -126,18 +133,18 @@ export default function Sidebar({ symbol, latestData, sidebarOpen, setSidebarOpe
 							<div className="mt-6 space-y-3 text-lg">
 								<h3 className="text-lg font-semibold text-center">🏢 Company Profile</h3>
 								<p>Name: <span className="text-blue-300">{companyInfo.name}</span></p>
-								<p>Sector: <span className="text-blue-300">{companyInfo.sector}</span></p>
-								<p>Industry: <span className="text-blue-300">{companyInfo.industry}</span></p>
+									<p>Sector: <span className="text-blue-300">{companyInfo.sector}</span></p>
 								<p>Market Cap: <span className="text-yellow-400">{companyInfo.marketCap}</span></p>
-								<p className="truncate">📄 {companyInfo.description}</p>
-								<a
-									href={companyInfo.website}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-blue-400 hover:underline"
-								>
-									Visit Website
-								</a>
+									<p>Description: <span className="text-green-200">{companyInfo.description}</span></p>
+									<span>Company Website: <a
+										href={companyInfo.website}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-blue-400 hover:underline"
+									>
+										{companyInfo.website}
+									</a>
+									</span>
 							</div>
 						)}
 

@@ -27,7 +27,6 @@ except Exception as e:
 feature_history = deque(maxlen=5)
 
 def predict_next_price():
-	""" Predicts the next stock price using the last 5 days of full feature set. """
 
 	if model is None or scaler is None:
 		return {"error": "Model or scaler not loaded. Cannot make predictions."}
@@ -39,19 +38,16 @@ def predict_next_price():
 			return {"error": f"Not enough historical data. Need {needed} more days."}
 
 		# Convert the last 5 days into a NumPy array
-		input_features = np.array(feature_history).flatten().reshape(1, -1)  # 5 days * 5 features = 25 total
-		print("Input Features (before scaling):", input_features)
+		input_features = np.array(feature_history).flatten().reshape(1, -1)
 
 		# Scale input data
 		scaled_features = np.array([scaler.transform(day.reshape(1, -1)).flatten() for day in input_features[0].reshape(5, 5)]).flatten().reshape(1, -1)
-		print("Scaled Features:", scaled_features)
 
 		# Make prediction
 		predicted_price = model.predict(scaled_features)
 
 		# Inverse transform the predicted price
 		predicted_price_original = scaler.inverse_transform([[0, 0, 0, predicted_price[0], 0]])[0][3]
-		print("Predicted Price (original scale):", predicted_price_original)
 
 		return jsonify({"predicted_price": float(predicted_price_original)})
 
@@ -61,13 +57,10 @@ def predict_next_price():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-	"""API endpoint to receive stock data and return predicted price."""
 	try:
 		data = request.get_json()
 		if not data:
 			return jsonify({"error": "No data received"}), 400
-
-		print("Received data:", data)
 
 		# Ensure all required fields are present
 		required_fields = ["open", "high", "low", "close", "volume"]
@@ -78,7 +71,6 @@ def predict():
 		feature_history.append([
 			data["open"], data["high"], data["low"], data["close"], data["volume"]
 		])
-		print(f"Feature History (last 5 days): {list(feature_history)}")
 
 		# Call the prediction function
 		prediction_result = predict_next_price()
